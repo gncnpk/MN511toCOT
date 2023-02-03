@@ -13,3 +13,7 @@ Welcome to the MN 511 to CoT Events repository!
 
 1. Run `python -m pipenv run .\Main.py` to pull the cameras from 511mn.org
 2. Run `python -m pipenv run .\CoTCreator.py` to push CoT markers + video streams to TAK
+
+# Demonstration 
+
+![MN511TAKDEMO](https://user-images.githubusercontent.com/37220586/216511171-748e7e44-b8b0-4a7e-a8d6-9f7d4cbed793.gif)
