@@ -75,7 +75,8 @@ class MySerializer(pytak.QueueWorker):
                             "latitude": i['features'][0]['geometry']['coordinates'][1],
                             "longitude": i['features'][0]['geometry']['coordinates'][0],
                             "path": path,
-                            "address": address
+                            "address": address,
+                            "uuid": camId
                         }
                         camerasWithStreaming.append(dataToAppend)
                 except:
@@ -86,7 +87,7 @@ class MySerializer(pytak.QueueWorker):
                 await self.handle_data(item)
                 await asyncio.sleep(0.1)
             for i in camerasWithStreaming:
-                item = tak_sensor(i['name'], i['latitude'], i['longitude'], i['streamURL'], i['path'], i['address'], poll_interval + processing_latency)
+                item = tak_sensor(i['name'], i['uuid'], i['latitude'], i['longitude'], i['streamURL'], i['path'], i['address'], poll_interval + processing_latency)
                 await self.handle_data(item)
                 await asyncio.sleep(0.1)
 
@@ -94,12 +95,12 @@ class MySerializer(pytak.QueueWorker):
             await asyncio.sleep(poll_interval)
 
 
-def tak_sensor(cam_name, lat, lon, url, path, address, poll_interval):
+def tak_sensor(cam_name, uuid, lat, lon, url, path, address, poll_interval):
     """
     Generates a sensor.
     """
-    event_uuid = f"MN511-{cam_name}-CAMERA"
-    video_uuid = f"MN511-{cam_name}-VIDEO"
+    event_uuid = f"MN511-{uuid}-CAMERA"
+    video_uuid = f"MN511-{uuid}-VIDEO"
     root = ET.Element("event")
     root.set("version", "2.0")
     root.set("type", "b-m-p-s-p-loc")
