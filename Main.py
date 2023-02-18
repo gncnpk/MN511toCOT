@@ -179,8 +179,6 @@ def tak_roadReport(lat, lon, uuid, description, poll_interval):
     detail = ET.SubElement(root, 'detail')
     status = ET.SubElement(detail, 'status')
     status.set('readiness', 'true')
-    ET.SubElement(detail, 'archive')
-    ET.SubElement(detail, "archive")
     precisionlocation = ET.SubElement(detail, "precisionlocation")
     precisionlocation.set("altsrc", "DTED0")
     remarks = ET.SubElement(detail, 'remarks')
