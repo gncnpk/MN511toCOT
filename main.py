@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 import uuid
 import time
 import requests
+import logging
 
 from configparser import ConfigParser
 
@@ -28,6 +29,13 @@ class MySerializer(pytak.QueueWorker):
         """
         Runs the loop for processing or generating pre-COT data.
         """
+        logger = logging.getLogger('mn511tocot')
+        logger.setLevel("INFO")
+        ch = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        ch.setLevel(logging.DEBUG)
+        logger.addHandler(ch)
         while True:
             # Initalize config vars
             road_reports_enabled = self.config.get("ROAD_REPORTS_ENABLED")
@@ -96,7 +104,7 @@ class MySerializer(pytak.QueueWorker):
                     item = tak_sensor(i['name'], i['uuid'], i['latitude'], i['longitude'], i['streamURL'], i['path'], i['address'], poll_interval + processing_latency)
                     await self.handle_data(item)
                     await asyncio.sleep(0.1)
-            print(f"Added {len(roadReports)} road reports and {len(camerasWithStreaming)} cameras! Checking in {poll_interval // 60} minutes...")
+            logger.info(f"Added {len(roadReports)} road reports and {len(camerasWithStreaming)} cameras! Checking in {poll_interval // 60} minutes...")
             await asyncio.sleep(poll_interval)
 
 
