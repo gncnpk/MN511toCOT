@@ -29,6 +29,11 @@ class MySerializer(pytak.QueueWorker):
         Runs the loop for processing or generating pre-COT data.
         """
         while True:
+            # Initalize config vars
+            road_reports_enabled = self.config.get("ROAD_REPORTS_ENABLED")
+            cameras_enabled = self.config.get("CAMS_ENABLED")
+            if road_reports_enabled.lower() == "false" and cameras_enabled.lower() == "false":
+                raise Exception("Nothing is enabled in config.ini! Please set CAMERAS_ENALBED to true or/and ROAD_REPORTS_ENABLED to true...")
             # Initalize variables with queries
             road_reports_body = [ { "query": "query MapFeatures($input: MapFeaturesArgs!, $plowType: String) { mapFeaturesQuery(input: $input) { mapFeatures { bbox tooltip uri features { id geometry properties } __typename ... on Camera { views(limit: 5) { uri ... on CameraView { url } category } } ... on Plow { views(limit: 5, plowType: $plowType) { uri ... on PlowCameraView { url } category } } } error { message type } } }", "variables": { "input": { "north": 45.27842, "south": 44.64048, "east": -92.72554, "west": -93.37511, "zoom": 11, "layerSlugs": [ "roadReports" ] }, "plowType": "plowCameras" } } ]
             cameras_body = [ { "query": "query MapFeatures($input: MapFeaturesArgs!, $plowType: String) { mapFeaturesQuery(input: $input) { mapFeatures { bbox tooltip uri features { id geometry properties } __typename ... on Camera { views(limit: 5) { uri ... on CameraView { url } category } } ... on Plow { views(limit: 5, plowType: $plowType) { uri ... on PlowCameraView { url } category } } } error { message type } } }", "variables": { "input": { "north": 45.32945, "south": 44.69207, "east": -92.45245, "west": -93.85596, "zoom": 11, "layerSlugs": [ "normalCameras" ], "nonClusterableUris": [ "dashboard" ] }, "plowType": "plowCameras" } } ]
@@ -41,56 +46,56 @@ class MySerializer(pytak.QueueWorker):
             # Processing takes some time before sending out CoT events, this ensures markers don't disappear before processing has finished
             processing_latency = 600
             # Perform GET requests to get the latest road report + camera data
-            road_reports_request = requests.post(apiEndpointURL, json=road_reports_body) 
-            cameras_request = requests.post(apiEndpointURL, json=cameras_body) 
-            road_reports_json_data = road_reports_request.json()
-            cameras_json_data = cameras_request.json()
-            # Process road reports into a simple dict
-            for i in road_reports_json_data[0]['data']['mapFeaturesQuery']['mapFeatures']:
-                try:
-                    description = i['tooltip'].split(':')[1][1:]
-                    dataToAppend = {
-                        "description": description,
-                        "latitude": i['features'][0]['geometry']['coordinates'][1],
-                        "longitude": i['features'][0]['geometry']['coordinates'][0],
-                        "uuid": i['uri'].split('/')[1]
-                    }
-                    roadReports.append(dataToAppend)
-                except:
-                    continue
-            # Process camera data into a simple dict and test for streaming capabilities
-            for i in cameras_json_data[0]['data']['mapFeaturesQuery']['mapFeatures']:
-                try:
-                    camName = i['tooltip']
-                    camId = i['views'][0]['url'].split('/MN/')[1].split('?')[0]
-                    streamURL = f"https://video.dot.state.mn.us/public/{camId}.stream/playlist.m3u8"
-                    address = streamURL.split('https://')[1].split('/')[0]
-                    path = streamURL.split('https://video.dot.state.mn.us')[1]
-                    r2 = requests.head(streamURL)
-                    if r2.status_code == 200:
-                        i['views'][0]['streamURL'] = streamURL
+            if road_reports_enabled.lower() == "true":
+                road_reports_request = requests.post(apiEndpointURL, json=road_reports_body) 
+                road_reports_json_data = road_reports_request.json()
+                # Process road reports into a simple dict
+                for i in road_reports_json_data[0]['data']['mapFeaturesQuery']['mapFeatures']:
+                    try:
+                        description = i['tooltip'].split(':')[1][1:]
                         dataToAppend = {
-                            "name": camName,
-                            "streamURL": streamURL,
+                            "description": description,
                             "latitude": i['features'][0]['geometry']['coordinates'][1],
                             "longitude": i['features'][0]['geometry']['coordinates'][0],
-                            "path": path,
-                            "address": address,
-                            "uuid": camId
+                            "uuid": i['uri'].split('/')[1]
                         }
-                        camerasWithStreaming.append(dataToAppend)
-                except:
-                    continue
-            # Create CoT events from road reports dict
-            for i in roadReports:
-                item = tak_roadReport(i['latitude'], i['longitude'], i['uuid'], i['description'], poll_interval + processing_latency)
-                await self.handle_data(item)
-                await asyncio.sleep(0.1)
-            for i in camerasWithStreaming:
-                item = tak_sensor(i['name'], i['uuid'], i['latitude'], i['longitude'], i['streamURL'], i['path'], i['address'], poll_interval + processing_latency)
-                await self.handle_data(item)
-                await asyncio.sleep(0.1)
-
+                        roadReports.append(dataToAppend)
+                    except:
+                        continue
+                for i in roadReports:
+                    item = tak_roadReport(i['latitude'], i['longitude'], i['uuid'], i['description'], poll_interval + processing_latency)
+                    await self.handle_data(item)
+                    await asyncio.sleep(0.1)
+            if cameras_enabled.lower() == "true":
+                cameras_request = requests.post(apiEndpointURL, json=cameras_body) 
+                cameras_json_data = cameras_request.json()
+                # Process camera data into a simple dict and test for streaming capabilities
+                for i in cameras_json_data[0]['data']['mapFeaturesQuery']['mapFeatures']:
+                    try:
+                        camName = i['tooltip']
+                        camId = i['views'][0]['url'].split('/MN/')[1].split('?')[0]
+                        streamURL = f"https://video.dot.state.mn.us/public/{camId}.stream/playlist.m3u8"
+                        address = streamURL.split('https://')[1].split('/')[0]
+                        path = streamURL.split('https://video.dot.state.mn.us')[1]
+                        r2 = requests.head(streamURL)
+                        if r2.status_code == 200:
+                            i['views'][0]['streamURL'] = streamURL
+                            dataToAppend = {
+                                "name": camName,
+                                "streamURL": streamURL,
+                                "latitude": i['features'][0]['geometry']['coordinates'][1],
+                                "longitude": i['features'][0]['geometry']['coordinates'][0],
+                                "path": path,
+                                "address": address,
+                                "uuid": camId
+                            }
+                            camerasWithStreaming.append(dataToAppend)
+                    except:
+                        continue
+                for i in camerasWithStreaming:
+                    item = tak_sensor(i['name'], i['uuid'], i['latitude'], i['longitude'], i['streamURL'], i['path'], i['address'], poll_interval + processing_latency)
+                    await self.handle_data(item)
+                    await asyncio.sleep(0.1)
             print(f"Added {len(roadReports)} road reports and {len(camerasWithStreaming)} cameras! Checking in {poll_interval // 60} minutes...")
             await asyncio.sleep(poll_interval)
 

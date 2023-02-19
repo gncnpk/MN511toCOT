@@ -15,7 +15,7 @@
 Run `python -m pipenv run python main.py` to start the application.
 
 ### Example Config
-This config connects to a TAK server instance via TLS (with a self-signed cert), pulls data and pushes CoT events every hour.
+This config connects to TAK server instance via TLS (with a self-signed cert), pulls data and pushes CoT events every hour. This will only push cameras and not road reports.
 
 `config.ini`
 ```ini
@@ -25,4 +25,6 @@ PYTAK_TLS_CLIENT_CERT = private_key.pem
 PYTAK_TLS_CLIENT_KEY = private_key.pem
 PYTAK_TLS_DONT_VERIFY = true
 POLL_INTERVAL = 3600
+CAMS_ENABLED = true
+ROAD_REPORTS_ENABLED = false
 ```
