@@ -40,9 +40,9 @@ ROAD_REPORTS_ENABLED = false
 ## State Compatability Table
 | State         | Supported     | Notes | API|
 |--------------|-----------|------------|----|
-| Minnesota | Yes      |Decoder needs to be rewritten|https://www.castlerockits.com/xml-data-feeds|
-| Iowa | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
-| Nebraska | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
-| Kanasas | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
-| Indiana | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
-| Idaho | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
+| Minnesota | ✔️      |Decoder needs to be rewritten|https://www.castlerockits.com/xml-data-feeds|
+| Iowa | 🛠️      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
+| Nebraska | 🛠️      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
+| Kanasas | 🛠️      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
+| Indiana | 🛠️      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
+| Idaho | 🛠️      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
