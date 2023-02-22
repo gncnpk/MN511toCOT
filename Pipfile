@@ -5,8 +5,6 @@ name = "pypi"
 
 [packages]
 requests = "*"
+pytak = "*"
 
 [dev-packages]
-
-[requires]
-python_version = "3.11"

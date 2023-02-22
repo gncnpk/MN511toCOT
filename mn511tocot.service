@@ -1,0 +1,11 @@
+[Unit]
+Description=MN511toCOT Service
+After=multi-user.target
+[Service]
+User=root
+WorkingDirectory=/home/pi/511toCOT
+ExecStart=/home/pi/511toCOT/run.sh
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
