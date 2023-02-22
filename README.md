@@ -1,5 +1,5 @@
-# MN511 to CoT
-### A PyTAK application that pulls cameras and road reports from 511mn.org and pushes it to TAK as a CoT Event.
+# 511 to CoT
+### A PyTAK application that pulls cameras and road reports from 511 Data Feeds and pushes it to TAK as a CoT Event.
 
 
 ## Installation
@@ -36,3 +36,13 @@ POLL_INTERVAL = 3600
 CAMS_ENABLED = true
 ROAD_REPORTS_ENABLED = false
 ```
+
+## State Compatability Table
+| State         | Supported     | Notes | API|
+|--------------|-----------|------------|----|
+| Minnesota | Yes      |Decoder needs to be rewritten|https://www.castlerockits.com/xml-data-feeds|
+| Iowa | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
+| Nebraska | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
+| Kanasas | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
+| Indiana | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
+| Idaho | WIP      | Decoder needs to be created|https://www.castlerockits.com/xml-data-feeds|
